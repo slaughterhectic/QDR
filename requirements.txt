@@ -1,0 +1,9 @@
+Flask
+Werkzeug
+firebase-admin
+openai
+bcrypt
+pyrebase4
+gunicorn
+psycopg2-binary
+openai

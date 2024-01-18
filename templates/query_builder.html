@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Builder App</title>
+    <style>
+body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(-70deg, #fa7c30 50%, rgba(0, 0, 0, 0) 30%);
+            margin: 0;
+            padding: 0;
+        }
+
+
+        h1 {
+
+            color: black;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+            box-shadow: rgba(0, 0, 0, 0.17) 0px -23px 25px 0px inset, rgba(0, 0, 0, 0.15) 0px -36px 30px 0px inset, rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px, rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px, rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+            border-radius: 5px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input, select {
+            border-radius: 12px;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #fa7c30;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            margin: 4px;
+        }
+
+        #result {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+            .queryRow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .queryRow label {
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    .queryRow input {
+        flex: 2;
+        box-sizing: border-box;
+        margin-right: 10px;
+    }
+
+    </style>
+</head>
+
+<body onload="generateQueryForms()">
+
+    <h1>Rule Builder App</h1>
+
+    <form id="queryForm">
+        <label for="tableName">Select Table:</label>
+        <select id="tableName" name="tableName">
+            {% for table in table_names %}
+                <option value="{{ table }}">{{ table }}</option>
+            {% endfor %}
+        </select>
+
+
+    <form id="table">
+        <label for="numQueries">Number of Queries:</label>
+        <input type="number" id="numQueries" name="numQueries" min="1" onchange="generateQueryForms()" required>
+
+        <button type="button" onclick="addQuery()">Add Query</button>
+
+        <div id="queryFormsContainer">
+            <!-- Query forms will be dynamically added here -->
+        </div>
+
+        <label for="condition">Condition:</label>
+
+<select id="condition" name="condition" onchange="showHideDropdowns()">
+    <option value="All">All</option>
+    <option value="Any">Any</option>
+    <option value="AtLeast">At Least</option>
+    <option value="AtMost">At Most</option>
+</select>
+        <div id="atLeastContainer" style="display: none;">
+            <label for="atLeast">At Least:</label>
+            <select id="atLeast" name="atLeast">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <!-- Add more options as needed -->
+            </select>
+        </div>
+
+        <div id="atMostContainer" style="display: none;">
+            <label for="atMost">At Most:</label>
+            <select id="atMost" name="atMost">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <!-- Add more options as needed -->
+            </select>
+        </div>
+
+                <div id="customModificationsContainer">
+            <!-- Container for dynamically added custom modifications -->
+        </div>
+
+        <button type="button" onclick="addCustomModification()">Add Custom Modification</button>
+
+
+
+        <button type="button" onclick="submitQueries()">Submit</button>
+    </form>
+
+    <div id="result"></div>
+
+
+    <script>
+    function generateQueryForms() {
+        const numQueries = document.getElementById('numQueries').value;
+        const container = document.getElementById('queryFormsContainer');
+        container.innerHTML = '';  // Clear previous forms
+
+        for (let i = 1; i <= numQueries; i++) {
+            const form = document.createElement('div');
+            form.classList.add('queryForm');
+
+            form.innerHTML = `
+                <div class="queryRow">
+
+                    <input type="text" id="field${i}" name="field${i}" class="field" placeholder="Field" required>
+
+
+                    <input type="text" id="operator${i}" name="operator${i}" class="operator" placeholder="Operator" required>
+
+
+                    <input type="text" id="value${i}" name="value${i}" class="value" placeholder="Value" required>
+                </div>
+            `;
+            container.appendChild(form);
+        }
+    }
+            function addQuery() {
+            const container = document.getElementById('queryFormsContainer');
+            const numQueriesInput = document.getElementById('numQueries');
+            const numQueries = parseInt(numQueriesInput.value) + 1;
+
+            numQueriesInput.value = numQueries;  // Update the number of queries
+
+            const form = document.createElement('div');
+            form.classList.add('queryForm');
+
+            form.innerHTML = `
+                <div class="queryRow">
+                    <input type="text" id="field${numQueries}" name="field${numQueries}" class="field" placeholder="Field" required>
+                    <input type="text" id="operator${numQueries}" name="operator${numQueries}" class="operator" placeholder="Operator" required>
+                    <input type="text" id="value${numQueries}" name="value${numQueries}" class="value" placeholder="Value" required>
+                    <button type="button" onclick="deleteQuery(${numQueries})">Delete</button>
+                </div>
+            `;
+            container.appendChild(form);
+        }
+                function addCustomModification() {
+            const container = document.getElementById('customModificationsContainer');
+
+            const customModificationInput = document.createElement('input');
+            customModificationInput.type = 'text';
+            customModificationInput.name = 'customModifications[]'; // Use an array to collect multiple custom modifications
+            customModificationInput.placeholder = 'Enter custom modification';
+
+            container.appendChild(customModificationInput);
+        }
+                function deleteQuery(queryId) {
+            const container = document.getElementById('queryFormsContainer');
+            const numQueriesInput = document.getElementById('numQueries');
+            const numQueries = parseInt(numQueriesInput.value);
+
+            if (numQueries > 1) {
+                // Remove the query form
+                const formToRemove = document.getElementById(`field${queryId}`).closest('.queryForm');
+                container.removeChild(formToRemove);
+
+                // Update the number of queries
+                numQueriesInput.value = numQueries - 1;
+            } else {
+                alert("You must have at least one query.");
+            }
+        }
+
+        function showHideDropdowns() {
+            const condition = document.getElementById('condition').value;
+            const atLeastContainer = document.getElementById('atLeastContainer');
+            const atMostContainer = document.getElementById('atMostContainer');
+
+            if (condition === 'AtLeast') {
+                atLeastContainer.style.display = 'block';
+                atMostContainer.style.display = 'none';
+            } else if (condition === 'AtMost') {
+                atLeastContainer.style.display = 'none';
+                atMostContainer.style.display = 'block';
+            } else {
+                atLeastContainer.style.display = 'none';
+                atMostContainer.style.display = 'none';
+            }
+        }
+
+        function submitQueries() {
+            const form = document.getElementById('queryForm');
+            const formData = new FormData(form);
+
+            fetch('/query', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResult(data.data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function displayResult(result) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<h2>Query Result:</h2>';
+
+            if (result.length === 0) {
+                resultDiv.innerHTML += '<p>No matching records found.</p>';
+            } else {
+                const table = document.createElement('table');
+                const headerRow = document.createElement('tr');
+
+                Object.keys(result[0]).forEach(colName => {
+                    const th = document.createElement('th');
+                    th.textContent = colName;
+                    headerRow.appendChild(th);
+                });
+
+                table.appendChild(headerRow);
+
+                result.forEach(record => {
+                    const row = document.createElement('tr');
+                    Object.values(record).forEach(value => {
+                        const td = document.createElement('td');
+                        td.textContent = value;
+                        row.appendChild(td);
+                    });
+                    table.appendChild(row);
+                });
+
+                resultDiv.appendChild(table);
+            }
+        }
+    </script>
+</body>
+</html>
