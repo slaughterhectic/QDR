@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rule Builder App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <style>
 body {
             font-family: Arial, sans-serif;
@@ -54,7 +55,8 @@ body {
             border-radius: 5px;
             cursor: pointer;
             font-size: 15px;
-            margin: 4px;
+            margin-left: 4px;
+            margin-bottom: 14px;
         }
 
         #result {
@@ -99,9 +101,13 @@ body {
     }
 
     .queryRow input {
-        flex: 2;
+        {#flex: 2;#}
         box-sizing: border-box;
         margin-right: 10px;
+    }
+    .handle{
+        margin-bottom: 16px;
+        margin-right: 4px;
     }
 
     </style>
@@ -183,15 +189,31 @@ body {
             form.classList.add('queryForm');
 
             form.innerHTML = `
+
                 <div class="queryRow">
+                <div class="handle">☰</div>
+<select id="field${i}" name="field${i}" class="field" required>
+                <option value="Name">Name</option>
+                <option value="Age">Age</option>
+                <option value="salary">Salary</option>
+                <option value="workingHour">Workinghour</option>
+            </select>
+            <select id="operator${i}" name="operator${i}" class="operator" required>
+                <option value="=">=</option>
+                <option value=">=">>=</option>
+                <option value="<="><=</option>
+                <option value=">">></option>
+                <option value="<"><</option>
+            </select>
 
-                    <input type="text" id="field${i}" name="field${i}" class="field" placeholder="Field" required>
-
-
-                    <input type="text" id="operator${i}" name="operator${i}" class="operator" placeholder="Operator" required>
+                    {#<input type="text" id="field${i}" name="field${i}" class="field" placeholder="Field" required>#}
+                    {##}
+                    {##}
+                    {#<input type="text" id="operator${i}" name="operator${i}" class="operator" placeholder="Operator" required>#}
 
 
                     <input type="text" id="value${i}" name="value${i}" class="value" placeholder="Value" required>
+                     <button type="button" onclick="deleteQuery(${i})">Delete</button>
                 </div>
             `;
             container.appendChild(form);
@@ -208,14 +230,31 @@ body {
             form.classList.add('queryForm');
 
             form.innerHTML = `
+
                 <div class="queryRow">
-                    <input type="text" id="field${numQueries}" name="field${numQueries}" class="field" placeholder="Field" required>
-                    <input type="text" id="operator${numQueries}" name="operator${numQueries}" class="operator" placeholder="Operator" required>
+                <div class="handle">☰</div>
+                    <select id="field${numQueries}" name="field${numQueries}" class="field" required>
+                <option value="Name">Name</option>
+                <option value="Age">Age</option>
+                <option value="salary">Salary</option>
+                <option value="workingHour">Workinghour</option>
+            </select>
+            <select id="operator${numQueries}" name="operator${numQueries}" class="operator" required>
+                <option value="=">=</option>
+                <option value=">=">>=</option>
+                <option value="<="><=</option>
+                <option value=">">></option>
+                <option value="<"><</option>
+            </select>
+                    {#<input type="text" id="field${numQueries}" name="field${numQueries}" class="field" placeholder="Field" required>#}
+                    {#<input type="text" id="operator${numQueries}" name="operator${numQueries}" class="operator" placeholder="Operator" required>#}
                     <input type="text" id="value${numQueries}" name="value${numQueries}" class="value" placeholder="Value" required>
                     <button type="button" onclick="deleteQuery(${numQueries})">Delete</button>
                 </div>
             `;
+
             container.appendChild(form);
+            initializeSortable();
         }
                 function addCustomModification() {
             const container = document.getElementById('customModificationsContainer');
@@ -281,7 +320,7 @@ body {
                 console.error('Error:', error);
             });
         }
-
+        const rowname=["Id","Name","Age","Salary","Working Hours","City"];
         function displayResult(result) {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = '<h2>Query Result:</h2>';
@@ -294,14 +333,16 @@ body {
 
                 Object.keys(result[0]).forEach(colName => {
                     const th = document.createElement('th');
-                    th.textContent = colName;
+                    th.textContent = rowname[colName];
                     headerRow.appendChild(th);
                 });
 
                 table.appendChild(headerRow);
 
+
                 result.forEach(record => {
                     const row = document.createElement('tr');
+                    {#row.textContent=""#}
                     Object.values(record).forEach(value => {
                         const td = document.createElement('td');
                         td.textContent = value;
@@ -313,6 +354,16 @@ body {
                 resultDiv.appendChild(table);
             }
         }
+        function initializeSortable() {
+                const queryFormsContainer = document.getElementById('queryFormsContainer');
+                new Sortable(queryFormsContainer, {
+                    handle: '.handle',
+                    ghostClass: 'blue-background-class',
+                    animation: 150
+                });
+            }
+
+            initializeSortable();
     </script>
 </body>
 </html>
